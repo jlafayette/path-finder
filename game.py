@@ -50,11 +50,21 @@ class Block(object):
         if type_ is not None:
             self._type = type_
 
+        # path-finding attrs
+        self.parent = None
+        self.open = False
+        self.visited = False
+
     def draw(self, screen):
         pygame.draw.rect(screen, self.fill_color,
                          pygame.Rect(self.x_pos, self.y_pos, self.size, self.size))
         pygame.draw.rect(screen, self.outline_color,
                          pygame.Rect(self.x_pos, self.y_pos, self.size, self.size), 1)
+
+    def reset(self):
+        self.parent = None
+        self.open = False
+        self.visited = False
 
     @property
     def type_(self):
@@ -121,9 +131,11 @@ class Grid(object):
                 col.append(Block(x, y, self.x_pos, self.y_pos, self.block_size, type_))
             self.blocks.append(col)
 
-        # hardcoded for now
-        self.blocks[0][int((num_y-1)/2)].type_ = START_TYPE
-        self.blocks[num_x-1][int((num_y-1)/2)].type_ = END_TYPE
+        self.set_start_end()
+
+    def set_start_end(self):
+        self.blocks[0][int((self.num_y - 1) / 2)].type_ = START_TYPE
+        self.blocks[self.num_x - 1][int((self.num_y - 1) / 2)].type_ = END_TYPE
 
     def draw(self):
         pygame.draw.rect(self.screen, BLUE,
@@ -146,12 +158,12 @@ class Grid(object):
 
     def refresh(self):
         for block in self.iter_blocks():
-            if block.type_ in [START_TYPE, END_TYPE]:
-                pass
-            elif rand_wall():
+            block.reset()
+            if rand_wall():
                 block.type_ = WALL_TYPE
             else:
                 block.type_ = NORMAL_TYPE
+        self.set_start_end()
 
     def get_start_block(self):
         for block in self.iter_blocks():
@@ -218,19 +230,30 @@ def main():
         if refresh:
             grid.refresh()
             refresh = False
-            for result in grid.draw_step():
-                pygame.display.flip()
-                clock.tick(480*4)
+            # for result in grid.draw_step():
+            #     pygame.display.flip()
+            #     clock.tick(480*4)
+            grid.draw()
 
-            solve = breadth_first.breadth_first_search(grid)
-            print(solve)
-            print(type(solve))
-            if solve is not None:
-                for block in solve:
+            goal_block = None
+            steps = 0
+            for item in breadth_first.breadth_first_search(grid):
+                goal_block = item
+                steps += 1
+                # add code here to draw and step
+
+                pass
+
+            print("steps: {}".format(steps))
+
+            print("goal_block: {!r}".format(goal_block))
+            if goal_block is not None:
+                for block in breadth_first.construct_path(goal_block):
                     try:
                         block.type_ = SOLVE_TYPE
                         block.draw(screen)
-                    except (TypeError, AttributeError):
+                    except (TypeError, AttributeError) as exc:
+                        print("caught err: {}".format(exc))
                         pass
                     pygame.display.flip()
                     clock.tick(240)
