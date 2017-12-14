@@ -5,7 +5,7 @@ import pygame
 import breadth_first
 
 
-SIZE = (800, 600)
+SIZE = (800, 800)
 WALL_PERCENTAGE = 20
 
 BLUE = (0, 128, 255)
@@ -45,6 +45,7 @@ class Block(object):
         self.x_pos = x*size + x_pos_offset
         self.y_pos = y*size + y_pos_offset
         self.size = size
+        self.rect = pygame.Rect(self.x_pos, self.y_pos, self.size, self.size)
 
         self.wall = wall
         self._start = False
@@ -58,10 +59,8 @@ class Block(object):
 
     def draw(self, screen):
         fill_color, outline_color = self.colors
-        pygame.draw.rect(screen, fill_color,
-                         pygame.Rect(self.x_pos, self.y_pos, self.size, self.size))
-        pygame.draw.rect(screen, outline_color,
-                         pygame.Rect(self.x_pos, self.y_pos, self.size, self.size), 1)
+        pygame.draw.rect(screen, fill_color, self.rect)
+        pygame.draw.rect(screen, outline_color, self.rect, 1)
 
     def reset(self):
         self.wall = False
@@ -138,8 +137,11 @@ class Grid(object):
         self.set_start_end()
 
     def set_start_end(self):
-        self.blocks[0][int((self.num_y - 1) / 2)].start = True
-        self.blocks[self.num_x - 1][int((self.num_y - 1) / 2)].end = True
+        self.blocks[0][0].start = True
+        self.blocks[self.num_x-1][self.num_y-1].end = True
+
+        # self.blocks[0][int((self.num_y - 1) / 2)].start = True
+        # self.blocks[self.num_x - 1][int((self.num_y - 1) / 2)].end = True
 
     def draw(self):
         pygame.draw.rect(self.screen, BLUE,
@@ -179,8 +181,6 @@ class Grid(object):
         return block.end
 
     def get_successors(self, block):
-        # print(str(block))
-        successors = []
         for x, y in [(block.x-1, block.y),   # left
                      (block.x, block.y+1),   # top
                      (block.x+1, block.y),   # right
@@ -196,9 +196,7 @@ class Grid(object):
                 pass
             else:
                 if not candidate.wall:
-                    successors.append(candidate)
-        # print("{!s} -> {!s}".format(block, [str(b) for b in successors]))
-        return successors
+                    yield candidate
 
 
 def main():
@@ -207,9 +205,10 @@ def main():
 
     done = False
     refresh = False
+    step_mode = False
     # x = 30
     # y = 30
-    grid = Grid(screen, 40, 30, 16)
+    grid = Grid(screen, 40, 40, 16)
 
     while not done:
         for event in pygame.event.get():
@@ -217,6 +216,9 @@ def main():
                 done = True
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 refresh = True
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                refresh = True
+                step_mode = True
 
         # pressed = pygame.key.get_pressed()
         # if pressed[pygame.K_UP]:
@@ -232,22 +234,54 @@ def main():
             grid.refresh()
             refresh = False
             # for result in grid.draw_step():
-            #     pygame.display.flip()
+            #     pygame.display.update()
             #     clock.tick(480*4)
             grid.draw()
+        else:
+            grid.draw()
+
+        pygame.display.update()
+        clock.tick(60)
+
+        if step_mode:
+            step_mode = False
+
+            zoom = False
 
             goal_block = None
             steps = 0
-            for item in breadth_first.breadth_first_search(grid):
-                goal_block = item
-                steps += 1
-                # add code here to draw and step
+            search_generator = breadth_first.breadth_first_search(grid)
+            while True:
+                if zoom:
+                    go_to_next = True
+                else:
+                    go_to_next = False
+                try:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            raise UserWarning("DONE!!")
+                        elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                            go_to_next = True
+                        elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                            zoom = True
+                except UserWarning:
+                    break
 
-                grid.draw()   # probably inefficient to redraw the whole thing
-                pygame.display.flip()
-                clock.tick(240)
+                if go_to_next:
+                    try:
+                        blocks = next(search_generator)
+                    except StopIteration:
+                        break
+                    if blocks[-1].end:
+                        goal_block = blocks[-1]
+                    steps += 1
 
-                pass
+                    # add code here to draw and step
+                    for block in blocks:
+                        block.draw(screen)
+                    pygame.display.update([block.rect for block in blocks])
+
+                    clock.tick(60*10)
 
             print("steps: {}".format(steps))
 
@@ -260,13 +294,8 @@ def main():
                     except (TypeError, AttributeError) as exc:
                         print("caught err: {}".format(exc))
                         pass
-                    pygame.display.flip()
-                    clock.tick(240)
-        else:
-            grid.draw()
-
-        pygame.display.flip()
-        clock.tick(60)
+                    pygame.display.update()
+                    clock.tick(60*4)
 
 
 if __name__ == '__main__':

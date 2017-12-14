@@ -21,9 +21,9 @@ def breadth_first_search(grid):
     while not open_queue.empty():
         parent_block = open_queue.get()
         parent_block.open = False
-
+        redraw = [parent_block]
         if grid.is_goal(parent_block):
-            yield parent_block   # The last thing yielded
+            yield redraw   # The last thing yielded
             break
 
         for child_block in grid.get_successors(parent_block):
@@ -35,9 +35,9 @@ def breadth_first_search(grid):
                 child_block.parent = parent_block
                 child_block.open = True
                 open_queue.put(child_block)
-
+                redraw.append(child_block)
         parent_block.visited = True
-        yield   # Allows game to step through the solve
+        yield redraw   # Allows game to step through the solve
 
 
 def construct_path(block):
