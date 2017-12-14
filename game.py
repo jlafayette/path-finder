@@ -12,6 +12,9 @@ BLUE = (0, 128, 255)
 ORANGE = (255, 100, 0)
 YELLOW = (255, 255, 102)
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+GREY = (128, 128, 128)
 
 
 def tint(color, amount=50):
@@ -25,6 +28,9 @@ def shade(color, amount=50):
 BLUE_TINT = tint(BLUE)
 BLUE_SHADE = shade(BLUE)
 YELLOW_SHADE = shade(YELLOW)
+RED_SHADE = shade(RED)
+GREEN_SHADE = shade(GREEN)
+GREY_SHADE = shade(GREY)
 
 
 def rand_wall():
@@ -93,7 +99,11 @@ class Block(object):
         elif self.start or self.end:
             return YELLOW, YELLOW_SHADE
         elif self.solve:
-            return ORANGE, YELLOW
+            return GREEN, GREEN_SHADE
+        elif self.visited:
+            return GREY, GREY_SHADE
+        elif self.open:
+            return YELLOW, YELLOW_SHADE
         else:
             return BLUE, BLUE_SHADE
 
@@ -232,6 +242,10 @@ def main():
                 goal_block = item
                 steps += 1
                 # add code here to draw and step
+
+                grid.draw()   # probably inefficient to redraw the whole thing
+                pygame.display.flip()
+                clock.tick(240)
 
                 pass
 
