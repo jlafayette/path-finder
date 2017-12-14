@@ -26,13 +26,6 @@ BLUE_TINT = tint(BLUE)
 BLUE_SHADE = shade(BLUE)
 YELLOW_SHADE = shade(YELLOW)
 
-WALL_TYPE = "wall"
-START_TYPE = "start"
-END_TYPE = "end"
-NORMAL_TYPE = "normal"
-SOLVE_TYPE = "solve"
-BLOCK_TYPES = (WALL_TYPE, START_TYPE, END_TYPE, NORMAL_TYPE, SOLVE_TYPE)
-
 
 def rand_wall():
     return random.random() < WALL_PERCENTAGE / 100
@@ -40,15 +33,17 @@ def rand_wall():
 
 class Block(object):
 
-    def __init__(self, x, y, x_pos_offset, y_pos_offset, size, type_=None):
+    def __init__(self, x, y, x_pos_offset, y_pos_offset, size, wall):
         self.x = x
         self.y = y
         self.x_pos = x*size + x_pos_offset
         self.y_pos = y*size + y_pos_offset
         self.size = size
-        self._type = NORMAL_TYPE
-        if type_ is not None:
-            self._type = type_
+
+        self.wall = wall
+        self._start = False
+        self._end = False
+        self.solve = False
 
         # path-finding attrs
         self.parent = None
@@ -56,51 +51,54 @@ class Block(object):
         self.visited = False
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.fill_color,
+        fill_color, outline_color = self.colors
+        pygame.draw.rect(screen, fill_color,
                          pygame.Rect(self.x_pos, self.y_pos, self.size, self.size))
-        pygame.draw.rect(screen, self.outline_color,
+        pygame.draw.rect(screen, outline_color,
                          pygame.Rect(self.x_pos, self.y_pos, self.size, self.size), 1)
 
     def reset(self):
+        self.wall = False
+        self._start = False
+        self._end = False
+        self.solve = False
         self.parent = None
         self.open = False
         self.visited = False
 
     @property
-    def type_(self):
-        return self._type
+    def start(self):
+        return self._start
 
-    @type_.setter
-    def type_(self, value):
-        if value in BLOCK_TYPES:
-            self._type = value
-        else:
-            raise ValueError("Invalid block type: {}".format(value))
-
-    @property
-    def fill_color(self):
-        if self.type_ == WALL_TYPE:
-            return BLACK
-        elif self.type_ in [START_TYPE, END_TYPE]:
-            return YELLOW
-        elif self.type_ == SOLVE_TYPE:
-            return ORANGE
-        else:
-            return BLUE
+    @start.setter
+    def start(self, value):
+        if value:
+            self.wall = False
+        self._start = value
 
     @property
-    def outline_color(self):
-        if self.type_ == WALL_TYPE:
-            return BLACK
-        elif self.type_ in [START_TYPE, END_TYPE]:
-            return YELLOW_SHADE
-        elif self.type_ == SOLVE_TYPE:
-            return YELLOW
+    def end(self):
+        return self._end
+
+    @end.setter
+    def end(self, value):
+        if value:
+            self.wall = False
+        self._end = value
+
+    @property
+    def colors(self):
+        if self.wall:
+            return BLACK, BLACK
+        elif self.start or self.end:
+            return YELLOW, YELLOW_SHADE
+        elif self.solve:
+            return ORANGE, YELLOW
         else:
-            return BLUE_SHADE
+            return BLUE, BLUE_SHADE
 
     def __repr__(self):
-        return "{0.__class__}[{0.x}][{0.y}] type: {0.type_}".format(self)
+        return "{0.__class__}[{0.x}][{0.y}] wall: {0.wall}".format(self)
 
     def __str__(self):
         return "{!s},{!s}".format(self.x, self.y)
@@ -124,18 +122,14 @@ class Grid(object):
         for x in range(num_x):
             col = []
             for y in range(num_y):
-                if rand_wall():
-                    type_ = WALL_TYPE
-                else:
-                    type_ = NORMAL_TYPE
-                col.append(Block(x, y, self.x_pos, self.y_pos, self.block_size, type_))
+                col.append(Block(x, y, self.x_pos, self.y_pos, self.block_size, rand_wall()))
             self.blocks.append(col)
 
         self.set_start_end()
 
     def set_start_end(self):
-        self.blocks[0][int((self.num_y - 1) / 2)].type_ = START_TYPE
-        self.blocks[self.num_x - 1][int((self.num_y - 1) / 2)].type_ = END_TYPE
+        self.blocks[0][int((self.num_y - 1) / 2)].start = True
+        self.blocks[self.num_x - 1][int((self.num_y - 1) / 2)].end = True
 
     def draw(self):
         pygame.draw.rect(self.screen, BLUE,
@@ -159,23 +153,20 @@ class Grid(object):
     def refresh(self):
         for block in self.iter_blocks():
             block.reset()
-            if rand_wall():
-                block.type_ = WALL_TYPE
-            else:
-                block.type_ = NORMAL_TYPE
+            block.wall = rand_wall()
         self.set_start_end()
 
     def get_start_block(self):
         for block in self.iter_blocks():
-            if block.type_ == START_TYPE:
+            if block.start:
                 return block
         else:
-            self.blocks[0][0].type_ = START_TYPE
+            self.blocks[0][0].start = True
             return self.blocks[0][0]
 
     @staticmethod
     def is_goal(block):
-        return block.type_ == END_TYPE
+        return block.end
 
     def get_successors(self, block):
         # print(str(block))
@@ -194,7 +185,7 @@ class Grid(object):
             except IndexError:
                 pass
             else:
-                if candidate.type_ in [NORMAL_TYPE, END_TYPE]:
+                if not candidate.wall:
                     successors.append(candidate)
         # print("{!s} -> {!s}".format(block, [str(b) for b in successors]))
         return successors
@@ -250,7 +241,7 @@ def main():
             if goal_block is not None:
                 for block in breadth_first.construct_path(goal_block):
                     try:
-                        block.type_ = SOLVE_TYPE
+                        block.solve = True
                         block.draw(screen)
                     except (TypeError, AttributeError) as exc:
                         print("caught err: {}".format(exc))
