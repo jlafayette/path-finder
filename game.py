@@ -250,7 +250,7 @@ def main():
 
             goal_block = None
             steps = 0
-            search_generator = breadth_first.breadth_first_search(grid)
+            search_generator = breadth_first.search(grid)
             while True:
                 if zoom:
                     go_to_next = True

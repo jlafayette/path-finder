@@ -1,7 +1,7 @@
 from queue import Queue
 
 
-def breadth_first_search(grid):
+def search(grid):
     print("starting search")
 
     # a FIFO open_set
