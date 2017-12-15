@@ -3,34 +3,11 @@ import random
 import pygame
 
 import breadth_first
+import color
 
 
 SIZE = (800, 800)
 WALL_PERCENTAGE = 20
-
-BLUE = (0, 128, 255)
-ORANGE = (255, 100, 0)
-YELLOW = (255, 255, 102)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-GREY = (128, 128, 128)
-
-
-def tint(color, amount=50):
-    return min(color[0]+amount, 255), min(color[1]+amount, 255), min(color[2]+amount, 255)
-
-
-def shade(color, amount=50):
-    return max(color[0]-amount, 0), max(color[1]-amount, 0), max(color[2]-amount, 0)
-
-
-BLUE_TINT = tint(BLUE)
-BLUE_SHADE = shade(BLUE)
-YELLOW_SHADE = shade(YELLOW)
-RED_SHADE = shade(RED)
-GREEN_SHADE = shade(GREEN)
-GREY_SHADE = shade(GREY)
 
 
 def rand_wall():
@@ -94,17 +71,17 @@ class Block(object):
     @property
     def colors(self):
         if self.wall:
-            return BLACK, BLACK
+            return color.BLACK, color.BLACK
         elif self.start or self.end:
-            return YELLOW, YELLOW_SHADE
+            return color.YELLOW, color.YELLOW_SHADE
         elif self.solve:
-            return GREEN, GREEN_SHADE
+            return color.GREEN, color.GREEN_SHADE
         elif self.visited:
-            return GREY, GREY_SHADE
+            return color.GREY, color.GREY_SHADE
         elif self.open:
-            return YELLOW, YELLOW_SHADE
+            return color.YELLOW, color.YELLOW_SHADE
         else:
-            return BLUE, BLUE_SHADE
+            return color.BLUE, color.BLUE_SHADE
 
     def __repr__(self):
         return "{0.__class__}[{0.x}][{0.y}] wall: {0.wall}".format(self)
@@ -144,13 +121,13 @@ class Grid(object):
         # self.blocks[self.num_x - 1][int((self.num_y - 1) / 2)].end = True
 
     def draw(self):
-        pygame.draw.rect(self.screen, BLUE,
+        pygame.draw.rect(self.screen, color.BLUE,
                          pygame.Rect(self.x_pos, self.y_pos, self.width, self.height))
         for block in self.iter_blocks():
             block.draw(self.screen)
 
     def draw_step(self):
-        pygame.draw.rect(self.screen, BLUE,
+        pygame.draw.rect(self.screen, color.BLUE,
                          pygame.Rect(self.x_pos, self.y_pos, self.width, self.height))
         yield
         for block in self.iter_blocks():
@@ -230,7 +207,7 @@ def main():
         #     x -= 3
         # if pressed[pygame.K_RIGHT]:
         #     x += 3
-        screen.fill(BLACK)
+        screen.fill(color.BLACK)
         if refresh:
             grid.refresh()
             refresh = False
