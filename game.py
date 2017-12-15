@@ -200,6 +200,7 @@ class Grid(object):
 
 
 def main():
+    pygame.init()
     screen = pygame.display.set_mode(SIZE)
     clock = pygame.time.Clock()
 
