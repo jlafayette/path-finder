@@ -1,4 +1,5 @@
 import random
+from collections import namedtuple
 
 import pygame
 
@@ -6,7 +7,10 @@ import color
 from block import Block
 
 
-WALL_PERCENTAGE = 20
+WALL_PERCENTAGE = 25
+
+
+Position = namedtuple('Position', 'x y')
 
 
 class Grid(object):
@@ -32,9 +36,22 @@ class Grid(object):
 
         self.refresh()
 
+    def get_random_position(self, exclude=None):
+        x = random.randint(0, self.num_x-1)
+        if exclude is not None:
+            while x == exclude.x:
+                x = random.randint(0, self.num_x-1)
+        y = random.randint(0, self.num_y-1)
+        if exclude is not None:
+            while y == exclude.y:
+                y = random.randint(0, self.num_y-1)
+        return Position(x, y)
+
     def set_start_end(self):
-        self.blocks[0][0].start = True
-        self.blocks[self.num_x-1][self.num_y-1].end = True
+        start_pos = self.get_random_position()
+        end_pos = self.get_random_position(exclude=start_pos)
+        self.blocks[start_pos.x][start_pos.y].start = True
+        self.blocks[end_pos.x][end_pos.y].end = True
 
         # self.blocks[0][int((self.num_y - 1) / 2)].start = True
         # self.blocks[self.num_x - 1][int((self.num_y - 1) / 2)].end = True
