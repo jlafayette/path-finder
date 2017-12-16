@@ -7,7 +7,7 @@ import color
 from block import Block
 
 
-WALL_PERCENTAGE = 25
+WALL_PERCENTAGE = 35
 
 
 Position = namedtuple('Position', 'x y')

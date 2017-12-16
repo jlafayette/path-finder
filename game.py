@@ -4,8 +4,13 @@ import breadth_first
 import a_star
 from grid import Grid
 
-
-SCREEN_SIZE = (800, 800)
+# large preset   # TODO: create multiple presets
+SPEED_MULT = 3
+X_NUM = 175*2
+Y_NUM = 87*2
+BLOCK_SIZE = 5
+BUFFER = 50
+SCREEN_SIZE = (X_NUM*BLOCK_SIZE+BUFFER, Y_NUM*BLOCK_SIZE+BUFFER)
 
 
 class Borg:
@@ -21,7 +26,7 @@ class Shared(Borg):
         if initialize:
             self.screen = pygame.display.set_mode(SCREEN_SIZE)
             self.clock = pygame.time.Clock()
-            self.grid = Grid(self.screen, 40, 40, 16, SCREEN_SIZE)
+            self.grid = Grid(self.screen, X_NUM, Y_NUM, BLOCK_SIZE, SCREEN_SIZE)
             self.generator = None
             self.state = CreateState()
             self.search = a_star.search
@@ -208,7 +213,7 @@ def main():
         else:
             shared.state.update()
             shared.state.draw()
-        shared.clock.tick(shared.state.fps)
+        shared.clock.tick(shared.state.fps*SPEED_MULT)
 
     # while not done:
     #     for event in pygame.event.get():
