@@ -105,7 +105,7 @@ class SolveState(BaseState):
             shared.generator = None
             self.updated_blocks = []
             if self.goal_block is None:
-                shared.state = IdleState()
+                shared.state = DisplaySolutionState()
             else:
                 shared.state = SolutionState(self.goal_block)
         else:
@@ -150,54 +150,20 @@ class DisplaySolutionState(BaseState):
             shared.state = CreateState()
 
 
-# lookup_dict = {
-#     State.IDLE: IdleState,
-#     State.CREATE: CreateState,
-#     State.SOLVE: SolveState,
-#     State.STEP_SOLVE: StepSolveState
-# }
-
-
-class Game(object):
-    def __init__(self):
-        pass
-        # self.grid = Grid(screen, 40, 40, 16, SCREEN_SIZE)
-        # self.state_code = State.CREATE
-        # self.state = CreateState(screen, self.grid)
-
-    def handleinput(self):
-        shared = Shared()
-        shared.state.handleinput()
-        # current_state = shared.state_code
-        # new_state_code = shared.state.handleinput()
-        # if current_state != new_state_code:
-        #     args = shared.state.exit()
-        #     shared.state = lookup_dict[new_state_code](*args)
-
-    def update(self):
-        shared = Shared()
-        shared.state.update()
-
-    def draw(self):
-        shared = Shared()
-        shared.state.draw()
-
-
 def main():
     pygame.init()
     shared = Shared(initialize=True)
-    game = Game()
     loop = 0
     while True:
         loop += 1
         # print(loop)
         try:
-            game.handleinput()
+            shared.state.handleinput()
         except RuntimeError:
             break
         else:
-            game.update()
-            game.draw()
+            shared.state.update()
+            shared.state.draw()
         shared.clock.tick(shared.state.fps)
 
     # while not done:
