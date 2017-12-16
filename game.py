@@ -105,7 +105,7 @@ class SolveState(BaseState):
             shared.generator = None
             self.updated_blocks = []
             if self.goal_block is None:
-                shared.state = DisplaySolutionState()
+                shared.state = DisplayResultState()
             else:
                 shared.state = SolutionState(self.goal_block)
         else:
@@ -125,7 +125,7 @@ class SolutionState(BaseState):
 
     def update(self):
         if self.block is None:
-            Shared().state = DisplaySolutionState()
+            Shared().state = DisplayResultState()
         else:
             self.block.solve = True
 
@@ -138,13 +138,13 @@ class SolutionState(BaseState):
             self.block = self.block.parent
 
 
-class DisplaySolutionState(BaseState):
+class DisplayResultState(BaseState):
     def __init__(self):
-        super(DisplaySolutionState, self).__init__()
+        super(DisplayResultState, self).__init__()
         self.fps = 10
 
     def process_event(self, event):
-        super(DisplaySolutionState, self).process_event(event)
+        super(DisplayResultState, self).process_event(event)
         shared = Shared()
         if event.type == pygame.KEYDOWN:   # press any key to continue
             shared.state = CreateState()
