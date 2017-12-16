@@ -47,6 +47,7 @@ class BaseState(object):
 class CreateState(BaseState):
     def __init__(self):
         super(CreateState, self).__init__()
+        Shared().generator = None
 
     def handleinput(self):
         super(CreateState, self).handleinput()
@@ -84,7 +85,8 @@ class SolveState(BaseState):
         super(SolveState, self).__init__()
         self.fps = 240
         shared = Shared()
-        shared.generator = breadth_first.search(shared.grid)
+        if shared.generator is None:
+            shared.generator = breadth_first.search(shared.grid)
 
         self.goal_block = None
         self.updated_blocks = list()
@@ -94,8 +96,10 @@ class SolveState(BaseState):
 
     def process_event(self, event):
         super(SolveState, self).process_event(event)
+        shared = Shared()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            shared.state = IdleState()
         # add toggle to step
-        # add Esc to idle
 
     def update(self):
         shared = Shared()
