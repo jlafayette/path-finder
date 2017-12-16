@@ -76,30 +76,28 @@ class IdleState(BaseState):
             shared.state = CreateState()
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_s:
             shared.state = SolveState()
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+            shared.state = StepSolveState()
 
-        # add key press event for STEP_SOLVE
 
-
-class SolveState(BaseState):
+class BaseSolveState(BaseState):
     def __init__(self):
-        super(SolveState, self).__init__()
-        self.fps = 240
+        super(BaseSolveState, self).__init__()
         shared = Shared()
         if shared.generator is None:
             shared.generator = breadth_first.search(shared.grid)
-
         self.goal_block = None
         self.updated_blocks = list()
-
-    def handleinput(self):
-        super(SolveState, self).handleinput()
+        self.toggle_state = NotImplemented   # type: BaseState()
+        self.toggle_keys = [pygame.K_SPACE]
 
     def process_event(self, event):
-        super(SolveState, self).process_event(event)
+        super(BaseSolveState, self).process_event(event)
         shared = Shared()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            shared.state = IdleState()
-        # add toggle to step
+            shared.state = CreateState()
+        elif event.type == pygame.KEYDOWN and event.key in self.toggle_keys:
+            shared.state = self.toggle_state()
 
     def update(self):
         shared = Shared()
@@ -120,6 +118,35 @@ class SolveState(BaseState):
         for block in self.updated_blocks:
             block.draw(Shared().screen)
         pygame.display.update([block.rect for block in self.updated_blocks])
+
+
+class SolveState(BaseSolveState):
+    def __init__(self):
+        super(SolveState, self).__init__()
+        self.fps = 240
+        self.toggle_state = StepSolveState
+        self.toggle_keys = [pygame.K_SPACE, pygame.K_RIGHT]
+
+
+class StepSolveState(BaseSolveState):
+    def __init__(self):
+        super(StepSolveState, self).__init__()
+        self.fps = 10
+        self.toggle_state = SolveState
+        self.step = False
+
+    def process_event(self, event):
+        super(StepSolveState, self).process_event(event)
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+            self.step = True
+
+    def update(self):
+        if self.step:
+            self.step = False
+            super(StepSolveState, self).update()
+        else:
+            # TODO: Add blinking for current block when idle
+            pass
 
 
 class SolutionState(BaseState):
