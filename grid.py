@@ -27,10 +27,10 @@ class Grid(object):
         for x in range(num_x):
             col = []
             for y in range(num_y):
-                col.append(Block(x, y, self.x_pos, self.y_pos, self.block_size, rand_wall()))
+                col.append(Block(x, y, self.x_pos, self.y_pos, self.block_size, False))
             self.blocks.append(col)
 
-        self.set_start_end()
+        self.refresh()
 
     def set_start_end(self):
         self.blocks[0][0].start = True
