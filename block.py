@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 
 import color
@@ -22,6 +24,8 @@ class Block(object):
         self.parent = None
         self.open = False
         self.visited = False
+        self.fscore = sys.maxsize
+        self.gscore = sys.maxsize
 
     def draw(self, screen):
         fill_color, outline_color = self.colors
@@ -36,6 +40,8 @@ class Block(object):
         self.parent = None
         self.open = False
         self.visited = False
+        self.fscore = sys.maxsize
+        self.gscore = sys.maxsize
 
     @property
     def start(self):
@@ -71,6 +77,9 @@ class Block(object):
             return color.YELLOW, color.YELLOW_SHADE
         else:
             return color.BLUE, color.BLUE_SHADE
+
+    def __lt__(self, other):
+        return self.fscore < other.fscore
 
     def __repr__(self):
         return "{0.__class__}[{0.x}][{0.y}] wall: {0.wall}".format(self)

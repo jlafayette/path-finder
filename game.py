@@ -1,6 +1,7 @@
 import pygame
 
 import breadth_first
+import a_star
 from grid import Grid
 
 
@@ -23,6 +24,13 @@ class Shared(Borg):
             self.grid = Grid(self.screen, 40, 40, 16, SCREEN_SIZE)
             self.generator = None
             self.state = CreateState()
+            self.search = a_star.search
+
+
+SEARCH_DICT = {
+    pygame.K_b: breadth_first.search,
+    pygame.K_a: a_star.search
+}
 
 
 class BaseState(object):
@@ -36,6 +44,11 @@ class BaseState(object):
     def process_event(self, event):
         if event.type == pygame.QUIT:
             raise RuntimeError
+        if event.type == pygame.KEYDOWN:
+            try:
+                Shared().search = SEARCH_DICT[event.key]
+            except KeyError:
+                pass
 
     def update(self):
         pass
@@ -85,7 +98,7 @@ class BaseSolveState(BaseState):
         super(BaseSolveState, self).__init__()
         shared = Shared()
         if shared.generator is None:
-            shared.generator = breadth_first.search(shared.grid)
+            shared.generator = shared.search(shared.grid)
         self.goal_block = None
         self.updated_blocks = list()
         self.toggle_state = NotImplemented   # type: BaseState()

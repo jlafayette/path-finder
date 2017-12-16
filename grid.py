@@ -89,6 +89,14 @@ class Grid(object):
             self.blocks[0][0].start = True
             return self.blocks[0][0]
 
+    def get_end_block(self):
+        for block in self.iter_blocks():
+            if block.end:
+                return block
+        else:
+            self.blocks[self.num_x-1][self.num_y-1].end = True
+            return self.blocks[self.num_x-1][self.num_y-1]
+
     @staticmethod
     def is_goal(block):
         return block.end
