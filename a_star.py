@@ -1,3 +1,4 @@
+import math
 from queue import PriorityQueue
 
 
@@ -44,7 +45,7 @@ def search(grid):
             yield redraw
             break
         current.visited = True
-        for neighbor in grid.get_successors(current):
+        for neighbor in grid.get_neighbors(current):
             if neighbor.visited:
                 continue   # Ignore the neighbor which is already evaluated.
             tentative_gscore = current.gscore + dist_between(current, neighbor)
@@ -66,4 +67,4 @@ def heuristic_cost_estimate(start, end):
 
 
 def dist_between(current, neighbor):
-    return 1
+    return math.sqrt((neighbor.x - current.x)**2 + (neighbor.y - current.y)**2)

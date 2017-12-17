@@ -26,7 +26,7 @@ def search(grid):
             yield redraw   # The last thing yielded
             break
 
-        for child_block in grid.get_successors(parent_block):
+        for child_block in grid.get_neighbors(parent_block):
 
             if child_block.visited:
                 continue

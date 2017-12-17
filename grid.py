@@ -7,7 +7,7 @@ import color
 from block import Block
 
 
-WALL_PERCENTAGE = 35
+WALL_PERCENTAGE = 55
 
 
 Position = namedtuple('Position', 'x y')
@@ -21,6 +21,7 @@ class Grid(object):
         self.width = num_x * block_size
         self.height = num_y * block_size
         self.block_size = block_size
+        self.allow_diagonal_neighbors = True
 
         remaining_w = screen_size[0] - self.width
         remaining_h = screen_size[1] - self.height
@@ -101,14 +102,26 @@ class Grid(object):
     def is_goal(block):
         return block.end
 
-    def get_successors(self, block):
-        for x, y in [(block.x-1, block.y),   # left
-                     (block.x, block.y+1),   # top
-                     (block.x+1, block.y),   # right
-                     (block.x, block.y-1)    # bottom
-                     ]:
-            # print("x: {} y: {}".format(x, y))
-
+    def get_neighbors(self, block):
+        if self.allow_diagonal_neighbors:
+            neighbor_coordinates = [
+                (block.x - 1, block.y),      # left
+                (block.x - 1, block.y + 1),  # top-left
+                (block.x, block.y + 1),      # top
+                (block.x + 1, block.y + 1),  # top-right
+                (block.x + 1, block.y),      # right
+                (block.x + 1, block.y - 1),  # bottom-right
+                (block.x, block.y - 1),      # bottom
+                (block.x - 1, block.y - 1)   # bottom-left
+            ]
+        else:
+            neighbor_coordinates = [
+                (block.x - 1, block.y),  # left
+                (block.x, block.y + 1),  # top
+                (block.x + 1, block.y),  # right
+                (block.x, block.y - 1)   # bottom
+            ]
+        for x, y in neighbor_coordinates:
             if x < 0 or y < 0:   # remove negatives so it doesn't continue across edges
                 continue
             try:
