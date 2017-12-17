@@ -4,13 +4,17 @@ import breadth_first
 import a_star
 from grid import Grid
 
-# large preset   # TODO: create multiple presets
-SPEED_MULT = 3
-X_NUM = 175*2
-Y_NUM = 87*2
-BLOCK_SIZE = 5
-BUFFER = 50
-SCREEN_SIZE = (X_NUM*BLOCK_SIZE+BUFFER, Y_NUM*BLOCK_SIZE+BUFFER)
+
+class LargePreset(object):
+    speed_mult = 3
+    x_num = 350
+    y_num = 174
+    block_size = 5
+    buffer = 50
+
+    @property
+    def screen_size(self):
+        return self.x_num*self.block_size + self.buffer, self.y_num*self.block_size + self.buffer
 
 
 class Borg:
@@ -21,12 +25,16 @@ class Borg:
 
 
 class Shared(Borg):
-    def __init__(self, initialize=False):
+    def __init__(self, initialize=False, preset=None):
         Borg.__init__(self)
         if initialize:
-            self.screen = pygame.display.set_mode(SCREEN_SIZE)
+            self.screen = pygame.display.set_mode(preset.screen_size)
             self.clock = pygame.time.Clock()
-            self.grid = Grid(self.screen, X_NUM, Y_NUM, BLOCK_SIZE, SCREEN_SIZE)
+            self.grid = Grid(self.screen,
+                             preset.x_num,
+                             preset.y_num,
+                             preset.block_size,
+                             preset.screen_size)
             self.generator = None
             self.state = CreateState()
             self.search = a_star.search
@@ -201,7 +209,8 @@ class DisplayResultState(BaseState):
 
 def main():
     pygame.init()
-    shared = Shared(initialize=True)
+    preset = LargePreset()
+    shared = Shared(initialize=True, preset=preset)
     while True:
         try:
             shared.state.handleinput()
@@ -210,7 +219,7 @@ def main():
         else:
             shared.state.update()
             shared.state.draw()
-        shared.clock.tick(shared.state.fps*SPEED_MULT)
+        shared.clock.tick(shared.state.fps * preset.speed_mult)
 
 
 if __name__ == '__main__':
