@@ -4,43 +4,37 @@ from queue import PriorityQueue
 
 def search(grid):
     print("starting {} search".format(__name__))
-    # The set of nodes already evaluated
-    # closedSet := {}  # block.visited
+    # node.visited: The set of nodes already evaluated.
 
     # The set of currently discovered nodes that are not evaluated yet.
     # Initially, only the start node is known.
-    # openSet := {start}
     start = grid.get_start_block()
     end = grid.get_end_block()
     open_queue = PriorityQueue()
 
-    # For each node, which node it can most efficiently be reached from.
-    # If a node can be reached from many nodes, cameFrom will eventually contain the
+    # node.parent: For each node, which node it can most efficiently be reached from.
+    # If a node can be reached from many nodes, parent will eventually contain the
     # most efficient previous step.
-    # cameFrom := an empty map    # add an attribute to block
 
-    # For each node, the cost of getting from the start node to that node.
-    # add attribute to block
-    # gScore := map with default value of Infinity
+    # node.gscore: For each node, the cost of getting from the start node to that node. It gets a
+    # a default value of Infinity
 
     # The cost of going from start to start is zero.
-    # gScore[start] := 0
     start.gscore = 0
 
-    # For each node, the total cost of getting from the start node to the goal
-    # by passing by that node. That value is partly known, partly heuristic.
-    # fScore := map with default value of Infinity
+    # node.fscore: For each node, the total cost of getting from the
+    # start node to the goal by passing by that node. That value is
+    # partly known, partly heuristic. It gets a default value of
+    # Infinity.
 
     # For the first node, that value is completely heuristic.
     start.fscore = heuristic_cost_estimate(start, end)
-    # fScore[start] := heuristic_cost_estimate(start, goal)
     open_queue.put(start)
 
     while not open_queue.empty():
-        # current = the node in open_queue having the lowest fScore[] value
-        current = open_queue.get()
+        current = open_queue.get()   # Node in open_queue having the lowest fScore value
         current.open = False
-        redraw = [current]
+        redraw = [current]   # List of nodes to be redrawn at each step.
         if grid.is_goal(current):
             yield redraw
             break
