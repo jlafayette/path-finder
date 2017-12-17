@@ -5,16 +5,28 @@ import a_star
 from grid import Grid
 
 
-class LargePreset(object):
+class StandardPreset(object):
+    speed_mult = 1
+    x_num = 40
+    y_num = 30
+    block_size = 16
+    buffer = 50
+    allow_diagonals = True
+    wall_percentage = 25
+
+    @property
+    def screen_size(self):
+        return self.x_num*self.block_size + self.buffer, self.y_num*self.block_size + self.buffer
+
+
+class LargePreset(StandardPreset):
     speed_mult = 3
     x_num = 350
     y_num = 174
     block_size = 5
     buffer = 50
-
-    @property
-    def screen_size(self):
-        return self.x_num*self.block_size + self.buffer, self.y_num*self.block_size + self.buffer
+    allow_diagonals = True
+    wall_percentage = 55
 
 
 class Borg:
@@ -30,11 +42,7 @@ class Shared(Borg):
         if initialize:
             self.screen = pygame.display.set_mode(preset.screen_size)
             self.clock = pygame.time.Clock()
-            self.grid = Grid(self.screen,
-                             preset.x_num,
-                             preset.y_num,
-                             preset.block_size,
-                             preset.screen_size)
+            self.grid = Grid(self.screen, preset)
             self.generator = None
             self.state = CreateState()
             self.search = a_star.search
@@ -209,7 +217,7 @@ class DisplayResultState(BaseState):
 
 def main():
     pygame.init()
-    preset = LargePreset()
+    preset = StandardPreset()
     shared = Shared(initialize=True, preset=preset)
     while True:
         try:

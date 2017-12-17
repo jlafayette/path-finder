@@ -7,31 +7,30 @@ import color
 from block import Block
 
 
-WALL_PERCENTAGE = 55
-
-
 Position = namedtuple('Position', 'x y')
 
 
 class Grid(object):
-    def __init__(self, screen, num_x, num_y, block_size, screen_size):
-        self.screen = screen
-        self.num_x = num_x
-        self.num_y = num_y
-        self.width = num_x * block_size
-        self.height = num_y * block_size
-        self.block_size = block_size
-        self.allow_diagonal_neighbors = True
+    def __init__(self, screen, preset):
 
-        remaining_w = screen_size[0] - self.width
-        remaining_h = screen_size[1] - self.height
+        self.screen = screen
+        self.num_x = preset.x_num
+        self.num_y = preset.y_num
+        self.width = preset.x_num * preset.block_size
+        self.height = preset.y_num * preset.block_size
+        self.block_size = preset.block_size
+        self.allow_diagonal_neighbors = preset.allow_diagonals
+        self.wall_percentage = preset.wall_percentage
+
+        remaining_w = preset.screen_size[0] - self.width
+        remaining_h = preset.screen_size[1] - self.height
         self.x_pos = int(remaining_w / 2)
         self.y_pos = int(remaining_h / 2)
 
         self.blocks = []
-        for x in range(num_x):
+        for x in range(preset.x_num):
             col = []
-            for y in range(num_y):
+            for y in range(preset.y_num):
                 col.append(Block(x, y, self.x_pos, self.y_pos, self.block_size, False))
             self.blocks.append(col)
 
@@ -79,7 +78,7 @@ class Grid(object):
     def refresh(self):
         for block in self.iter_blocks():
             block.reset()
-            block.wall = rand_wall()
+            block.wall = rand_wall(self.wall_percentage)
         self.set_start_end()
 
     def get_start_block(self):
@@ -133,5 +132,5 @@ class Grid(object):
                     yield candidate
 
 
-def rand_wall():
-    return random.random() < WALL_PERCENTAGE / 100
+def rand_wall(wall_percentage):
+    return random.random() < wall_percentage / 100
