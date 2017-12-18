@@ -20,7 +20,6 @@ class Shared(Borg):
         if initialize:
             self.screen = pygame.display.set_mode(selected_preset.screen_size)
             self.preset = selected_preset
-            self.clock = pygame.time.Clock()
             self.grid = Grid(self.screen, selected_preset)
             self.generator = None
             self.state = CreateState()
@@ -263,9 +262,9 @@ class DisplayResultState(BaseState):
 def main():
     pygame.init()
     pygame.font.init()
+    clock = pygame.time.Clock()
 
     selected_preset = preset.Standard()
-
     shared = Shared(initialize=True, selected_preset=selected_preset)
     display = StatusDisplay(0, 0)
 
@@ -284,7 +283,7 @@ def main():
             display.update()
             shared.state.draw()
             display.draw()
-        shared.clock.tick(shared.state.fps * selected_preset.speed_mult)
+        clock.tick(shared.state.fps * selected_preset.speed_mult)
 
 
 if __name__ == '__main__':
