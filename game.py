@@ -3,31 +3,8 @@ import pygame
 import breadth_first
 import a_star
 import color
+import preset
 from grid import Grid
-
-
-class StandardPreset(object):
-    speed_mult = 1
-    x_num = 40
-    y_num = 30
-    block_size = 16
-    buffer = 50
-    allow_diagonals = True
-    wall_percentage = 25
-
-    @property
-    def screen_size(self):
-        return self.x_num*self.block_size + self.buffer, self.y_num*self.block_size + self.buffer
-
-
-class LargePreset(StandardPreset):
-    speed_mult = 3
-    x_num = 350
-    y_num = 174
-    block_size = 5
-    buffer = 50
-    allow_diagonals = True
-    wall_percentage = 55
 
 
 class Borg:
@@ -38,13 +15,13 @@ class Borg:
 
 
 class Shared(Borg):
-    def __init__(self, initialize=False, preset=None):
+    def __init__(self, initialize=False, selected_preset=None):
         Borg.__init__(self)
         if initialize:
-            self.screen = pygame.display.set_mode(preset.screen_size)
-            self.preset = preset
+            self.screen = pygame.display.set_mode(selected_preset.screen_size)
+            self.preset = selected_preset
             self.clock = pygame.time.Clock()
-            self.grid = Grid(self.screen, preset)
+            self.grid = Grid(self.screen, selected_preset)
             self.generator = None
             self.state = CreateState()
             self.search = a_star.search
@@ -286,8 +263,10 @@ class DisplayResultState(BaseState):
 def main():
     pygame.init()
     pygame.font.init()
-    preset = StandardPreset()
-    shared = Shared(initialize=True, preset=preset)
+
+    selected_preset = preset.Standard()
+
+    shared = Shared(initialize=True, selected_preset=selected_preset)
     display = StatusDisplay(0, 0)
 
     # print("screentype: {}".format(type(shared.screen)))
@@ -305,7 +284,7 @@ def main():
             display.update()
             shared.state.draw()
             display.draw()
-        shared.clock.tick(shared.state.fps * preset.speed_mult)
+        shared.clock.tick(shared.state.fps * selected_preset.speed_mult)
 
 
 if __name__ == '__main__':
